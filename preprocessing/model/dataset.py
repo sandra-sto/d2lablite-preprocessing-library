@@ -1,40 +1,41 @@
-from typing import List
+from typing import List, Callable
+
 import numpy as np
 
-from preprocessing.dataset_transforms.dataset_transforms import DataSetTransforms
 from preprocessing.model.instance import Instance
+from preprocessing.timeseries.instance_df_transforms_strategy import InstanceDfTransformsStrategy
 from preprocessing.timeseries.instance_transforms import InstanceTransforms
 
 
 class DataSet:
-    def __init__(self, instance_transforms : InstanceTransforms, dataset_transforms: DataSetTransforms, instances : List[Instance]):
-
+    def __init__(self, instances : List[Instance]):
         self.instances = instances
-        self.instance_transforms = instance_transforms
-        self.dataset_transforms = dataset_transforms
 
-    def perform_transform(self, transform, **args) :
+    def perform_transform(self, transform: Callable, inplace: bool, arguments: dict) :
         # parallel implementation
-
-        transform_method = transform(args)
+        # change parameters
+        # t = InstanceTransforms(InstanceDfTransformsStrategy()).filter_parameters(**kwargs)
+        transform_method = transform(**arguments)
 
         transformed = [transform_method(instance) for instance in self.instances]
-        return DataSet(self.instance_transforms, self.dataset_transforms, transformed)
 
-    def perform_transforms(self, transforms):
-        return
+        if inplace:
+            self.instances = transformed
+            return None
+        else:
+            return DataSet(transformed)
 
-    def perform_dataset_transform(self, transform, **args):
-        transform(self, args)
+    def perform_dataset_transform(self, transform: Callable, arguments: dict):
+        return transform(self, **arguments)
 
     @property
-    def feature_vector(self):
+    def feature_vector(self) -> np.array:
         return np.array([df.values.T.flatten() for df in self.instances])
 
     @property
-    def columns(self):
+    def columns(self) -> List[str]:
         return self.instances[0].columns
 
     @property
-    def num_of_columns(self):
+    def num_of_columns(self) -> int:
         return len(self.instances[0].columns)

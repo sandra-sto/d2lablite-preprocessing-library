@@ -1,6 +1,6 @@
 from typing import List, Callable
 
-from pandas import DataFrame, DatetimeIndex, TimedeltaIndex, Series, Timestamp
+from pandas import DataFrame, DatetimeIndex, TimedeltaIndex, Timestamp
 
 from preprocessing.preprocessing_exception import PreprocessingException
 from preprocessing.timeseries.instance_transforms_strategy import InstanceTransformsStrategy
@@ -8,7 +8,7 @@ from preprocessing.timeseries.instance_transforms_strategy import InstanceTransf
 
 class InstanceDfTransformsStrategy (InstanceTransformsStrategy):
 
-    def resample(self, resample_factor: str, resample_method: Callable, instance: DataFrame):
+    def resample(self, resample_factor: str, resample_method: Callable, instance: DataFrame) -> DataFrame:
         try:
             resampled = instance.resample(resample_factor).resampled_method()
             resampled_filled = resampled.fillna(method = 'ffill')
@@ -18,26 +18,26 @@ class InstanceDfTransformsStrategy (InstanceTransformsStrategy):
         else:
             return resampled_filled
 
-    def remove_peaks(self, removing_peaks_method : str, instance: DataFrame):
+    def remove_peaks(self, removing_peaks_method : str, instance: DataFrame) -> DataFrame:
 
         if removing_peaks_method == ' QUANTILES':
             self.eliminate_picks_using_quartiles(instance)
         else:
             raise PreprocessingException('Unappropriate argument for removing peaks')
 
-    def make_windows(self, window_size: int, instance: DataFrame):
+    def make_windows(self, window_size: int, instance: DataFrame) -> DataFrame:
         return instance.to_period(window_size)
 
 
-    def remove_constant_parameters(self, instance : DataFrame):
+    def remove_constant_parameters(self, instance : DataFrame) -> DataFrame:
         return instance.loc[:, (instance != instance.iloc[0]).any()]
 
 
-    def filter_parameters(self, parameters_used : List[str], instance: DataFrame):
+    def filter_parameters(self, parameters_used : List[str], instance: DataFrame) -> DataFrame:
         instance = instance[parameters_used]
         return instance
 
-    def filter_parameters_except(self, parameters_excluded: List[str], all_parameters: List[str], instance: DataFrame):
+    def filter_parameters_except(self, parameters_excluded: List[str], all_parameters: List[str], instance: DataFrame) -> DataFrame:
         parameters_used = list(set(all_parameters) - set(parameters_excluded))
         return self.filter_parameters(parameters_used, instance)
 
@@ -45,7 +45,7 @@ class InstanceDfTransformsStrategy (InstanceTransformsStrategy):
         instance[parameters]*=factor
         return instance
 
-    def filter_instances_by_date(self, start_date : Timestamp, end_date: Timestamp, instance: DataFrame):
+    def filter_instances_by_date(self, start_date : Timestamp, end_date: Timestamp, instance: DataFrame) -> DataFrame:
         # offsets in df
         if isinstance(instance.index, DatetimeIndex):
             return instance.loc[start_date, end_date]
@@ -56,20 +56,21 @@ class InstanceDfTransformsStrategy (InstanceTransformsStrategy):
         else:
             raise PreprocessingException('Inappropriate DataFrame format')
 
-    def eliminate_picks_using_quartiles(self, instance : DataFrame):
+    def __eliminate_picks_using_quartiles(self, instance : DataFrame) -> DataFrame:
         low, high = 0.05, 0.95
 
         quantiles = instance.quantile([low, high])
+
         for name in instance.columns:
             instance = instance[(instance[name] >= quantiles.loc[low, name]) &
-                    (instance[name] <= quantiles.loc[high, name])]
-        instance.fillna(method='ffill', inplace=True)
+                                (instance[name] <= quantiles.loc[high, name])]
 
+        instance.fillna(method='ffill', inplace=True)
         return instance
 
-    def wavelet(self, instance: DataFrame):
+    def wavelet(self, instance: DataFrame) -> DataFrame:
         pass
 
-    def smooth_data(self, factor, method: Callable, instance: DataFrame):
+    def smooth_data(self, factor, method: Callable, instance: DataFrame) -> DataFrame:
         smoothed = instance.rolling(window = factor).method()
         return smoothed

@@ -1,8 +1,9 @@
+import datetime
 
 
 class Instance:
 
-    def __init__(self, id, data, type, start_date, metadata):
+    def __init__(self, id: str, data: object, type: str, start_date: datetime, metadata: dict):
         self._id = id
 
         self._data = data
