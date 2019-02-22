@@ -1,7 +1,8 @@
 from enum import Enum
 from typing import Callable
 
-from preprocessing.preprocessing_exception import PreprocessingException
+from preprocessing.transforms import instance_transforms
+from preprocessing.util.preprocessing_exception import PreprocessingException
 
 
 class DataType(Enum):
@@ -9,17 +10,13 @@ class DataType(Enum):
     univariate = 1
 
 
-
-
 class TransformsMapping:
-    def __init__(self, instance_transforms):
-        self.init_mapping_for_tranforms(instance_transforms)
-
-
+    def __init__(self):
+        self.init_mapping_for_tranforms()
         self.mapping = {DataType.univariate: self.univariate_transforms, DataType.timeseries: self.timeseries_transforms}
 
 
-    def init_mapping_for_tranforms(self, instance_transforms):
+    def init_mapping_for_tranforms(self):
         self.timeseries_transforms = {instance_transforms.resample,
                                       instance_transforms.remove_peaks,
                                       instance_transforms.make_windows,

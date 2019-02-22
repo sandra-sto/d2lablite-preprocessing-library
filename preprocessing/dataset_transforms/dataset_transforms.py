@@ -6,31 +6,26 @@ from sklearn.preprocessing import StandardScaler
 from preprocessing.model.dataset import DataSet
 
 
-class DataSetTransforms:
+def normalize(dataset: DataSet):
+    return
 
-    def normalize(self, dataset: DataSet):
-        return
+def pca(dataset: DataSet, num_components: int) :
+    pca = PCA(n_components=num_components)
+    reduced= pca.fit_transform(dataset.feature_vector)
+    components = pca.components_
 
-    def pca_reduced_and_components(self, dataset: DataSet, **kwargs) :
+    return DataSet(reduced), components
 
-        num_components = kwargs['num components']
+def standardize(dataset: DataSet, inplace: bool)-> (DataSet, Series, Series):
+    ss = StandardScaler(copy = not inplace)
 
-        pca = PCA(n_components=num_components)
-        reduced= pca.fit_transform(dataset.feature_vector)
-        components = pca.components_
+    data_by_columns = np.array([instance.data.values.flatten() for instance in dataset.instances])
+    data_by_columns = data_by_columns.reshape(-1, dataset.num_of_columns)
 
-        return DataSet(reduced), components
+    data_by_columns =ss.fit_transform(data_by_columns)
 
+    data_by_instances = data_by_columns.reshape(dataset.num_of_instances, -1)
+    standardized_array = np.array([instance.reshape(-1, dataset.num_of_columns) for instance in data_by_instances])
 
-    def standardize_and_get_params(self, dataset: DataSet, **kwargs)-> (DataSet, Series, Series):
-        inplace = kwargs['in_place']
-        ss = StandardScaler(copy = not inplace)
-        data_by_columns = np.array([instance.values for instance in dataset.instances]).reshape(dataset.num_of_columns)
-
-        if inplace:
-
-            # array = np.array(dataset.instances)
-            ss.fit_transform(data_by_columns)
-
-            return data_by_columns, Series(dataset.columns, ss.mean_), Series(dataset.columns, ss.scale_)
+    return DataSet(standardized_array), Series(ss.mean_, dataset.columns, ), Series(ss.scale_, dataset.columns)
 

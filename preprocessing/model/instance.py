@@ -31,5 +31,36 @@ class Instance:
     def start_date(self):
         return self._start_date
 
+    @property
+    def feature_vector(self):
+        return self.data.values.T.flatten()
+
+    @property
+    def columns(self):
+        return self.data.columns
+
+    @property
+    def num_of_columns(self):
+        return len(self.columns)
+
+    @property
+    def num_of_values(self):
+        return len(self.data)
+
+    def copy_with_different_data(self, new_data):
+        return Instance(self.id, new_data, self.type, self.start_date, self.meta_data)
+
+    def index_to_timedelta_ms(self):
+        self.data.index = self.data.index - self.data.index[0]
+
+    @start_date.setter
+    def start_date(self, date):
+        self.start_date = date
+
+    @data.setter
+    def data(self, data):
+        self.data = data
+
+
 
 
