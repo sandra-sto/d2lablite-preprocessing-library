@@ -1,8 +1,7 @@
 import logging
 
-from preprocessing.dataset_transforms import dataset_transforms
 from preprocessing.model.dataset import DataSet
-from preprocessing.transforms import instance_transforms
+from preprocessing.transforms import instance_transforms, dataset_transforms
 from preprocessing.util.transforms_mapping import DataType, TransformsMapping
 from os.path import dirname
 
@@ -20,6 +19,7 @@ def define_logger(log_file):
     f_format = logging.Formatter(FORMAT, datefmt='%d-%b-%y %H:%M:%S')
     f_handler.setFormatter(f_format)
     logger.addHandler(f_handler)
+    return logger
 
 class Preprocessor:
 

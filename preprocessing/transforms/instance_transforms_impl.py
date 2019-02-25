@@ -4,7 +4,7 @@ from typing import List
 import datetime
 import numpy as np
 from pandas import DatetimeIndex, TimedeltaIndex
-
+from unittest import skip
 from preprocessing.model.instance import Instance
 from preprocessing.util.preprocessing_exception import PreprocessingException
 
@@ -29,10 +29,9 @@ def remove_peaks(removing_peaks_method: str, instance: Instance) -> Instance:
         raise PreprocessingException('Unappropriate argument for removing peaks')
 
 def make_windows(period, instance: Instance) -> Instance:
-    if isinstance(instance.data, DatetimeIndex):
+    if isinstance(instance.data.index, DatetimeIndex):
         period_index_data = instance.data.to_period(period)
         return instance.copy_with_different_data(period_index_data)
-
     else:
         raise PreprocessingException('Inappropriate DataFrame format')
 
@@ -68,22 +67,19 @@ def filter_instance_by_date(start_date : str, end_date: str, instance: Instance)
         #
         # instance.data = instance.data.loc[diff_start : diff_end]
 
-        instance.data.index = np.datetime64(start_date)+instance.data.index
+        instance.data.index = np.datetime64(instance.start_date)+instance.data.index
 
-        instance.data = instance.data.loc[start_date : end_date]
+        instance.data = instance.data.loc[start_date : end_date,]
         instance.data.index = instance.data.index-instance.data.index[0]
 
     else:
         raise PreprocessingException('Inappropriate DataFrame format')
 
     # change start time if needed
-    if instance.start_date != instance.index[0]:
-        instance.start_date = instance.index[0]
+    if instance.start_date != instance.get_instance_index(0):
+        instance.start_date = instance.get_instance_index(0)
 
     return None if len(instance.data) == 0 else instance
-
-
-# def index_to_datetime():
 
 def __eliminate_picks_using_quantiles(instance : Instance) -> Instance:
     low, high = 0.05, 0.95
@@ -99,7 +95,6 @@ def __eliminate_picks_using_quantiles(instance : Instance) -> Instance:
 
 def wavelet(frequency_range, instance: Instance) -> Instance:
     pass
-
 
 def smooth_data(factor, method_name: str, instance: Instance) -> Instance:
     windowed = instance.data.rolling(window = factor)

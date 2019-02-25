@@ -2,9 +2,8 @@ from unittest import TestCase
 
 from mock import Mock
 
-from preprocessing.dataset_transforms import dataset_transforms
 from preprocessing.preprocess import Preprocessor
-from preprocessing.transforms import instance_transforms
+from preprocessing.transforms import instance_transforms, dataset_transforms
 from preprocessing.util.transforms_mapping import DataType
 
 

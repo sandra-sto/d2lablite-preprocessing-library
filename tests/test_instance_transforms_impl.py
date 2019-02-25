@@ -60,13 +60,13 @@ class TestInstanceTransformsImpl(TestCase):
         instance = instance_and_dataset_creator.create_instance(num_of_columns= 3, num_of_values = 3, index=True)
         instance.index_to_timedelta_ms()
         filtered = instance_transforms_impl.filter_instance_by_date('2018-11-11 00:00:00.0', '2018-11-12 00:00:00.0', instance)
-        npt.assert_array_equal(list(filtered.data.index), [pd.Timestamp('2018-11-11 00:00:00'), pd.Timestamp('2018-11-12 00:00:00')])
+        npt.assert_array_equal(list(filtered.data.index), [pd.Timedelta('0 days 00:00:00'), pd.Timedelta('1 days 00:00:00')])
 
     def test_resample_timedelta_index(self):
         instance = instance_and_dataset_creator.create_instance(num_of_columns= 3, num_of_values = 3, index=True)
         instance.index_to_timedelta_ms()
         instance = instance_transforms_impl.resample('2d', 'mean', instance)
-        npt.assert_array_equal(list(instance.data.index), [pd.Timestamp('2018-11-11 00:00:00'), pd.Timestamp('2018-11-13 00:00:00')])
+        npt.assert_array_equal(list(instance.data.index), [pd.Timedelta('0 days 00:00:00'), pd.Timedelta('2 days 00:00:00')])
 
     def test_make_windows_months_timedelta_index(self):
         instance = instance_and_dataset_creator.create_instance(num_of_columns= 3, num_of_values = 3, index=True)

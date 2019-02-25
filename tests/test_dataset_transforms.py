@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from preprocessing.dataset_transforms import dataset_transforms
+from preprocessing.transforms import dataset_transforms
 from tests import instance_and_dataset_creator
 
 

@@ -55,11 +55,14 @@ class Instance:
 
     @start_date.setter
     def start_date(self, date):
-        self.start_date = date
+        self._start_date = date
 
     @data.setter
     def data(self, data):
-        self.data = data
+        self._data = data
+
+    def get_instance_index(self, num):
+        return self.data.index[num]
 
 
 
