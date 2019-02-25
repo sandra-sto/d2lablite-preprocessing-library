@@ -74,9 +74,17 @@ class TestInstanceTransformsImpl(TestCase):
         instance = instance_transforms_impl.make_windows('M', instance)
         npt.assert_array_equal(list(instance.data.index), [pd.Period('2018-11'), pd.Period('2018-11'), pd.Period('2018-11')])
 
+
     ##############
-    def test__eliminate_picks_using_quantiles(self):
-        return
+    def test_standardize_instance(self):
+        instance = instance_and_dataset_creator.create_instance(num_of_columns= 3, num_of_values = 3)
+        means = pd.Series(np.array([0, 0.5, 1]), instance.columns)
+        stdevs = pd.Series(np.array([0.1, 0.5, 0.2]), instance.columns)
+
+        instance = instance_transforms_impl.standardize_instance(instance, means, stdevs)
+        values = np.array([[0., 1., 5.]]*3)
+        expected = pd.DataFrame(values, columns = instance.data.columns)
+        pd.testing.assert_frame_equal(expected, instance.data)
 
 
 

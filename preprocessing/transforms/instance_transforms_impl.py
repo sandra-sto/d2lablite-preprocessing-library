@@ -3,7 +3,7 @@ from typing import List
 
 import datetime
 import numpy as np
-from pandas import DatetimeIndex, TimedeltaIndex
+from pandas import DatetimeIndex, TimedeltaIndex, Series
 from unittest import skip
 from preprocessing.model.instance import Instance
 from preprocessing.util.preprocessing_exception import PreprocessingException
@@ -101,3 +101,8 @@ def smooth_data(factor, method_name: str, instance: Instance) -> Instance:
     smoothed = windowed.apply(methods[method_name.strip().upper()])
     smoothed = smoothed.fillna(method='bfill')
     return smoothed
+
+def standardize_instance(instance: Instance, means: Series, stdevs: Series):
+    for param in means.index:
+        instance.data[param] = (instance.data[param]-means[param]) / stdevs[param]
+    return instance
