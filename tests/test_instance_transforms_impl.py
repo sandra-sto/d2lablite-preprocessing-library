@@ -35,7 +35,8 @@ class TestInstanceTransformsImpl(TestCase):
         parameters = ['param1']
         instance = instance_transforms_impl.filter_parameters_except(parameters, self.instance)
 
-        npt.assert_array_equal(list(instance.columns), ['param2', 'param3'])
+
+        npt.assert_array_equal(np.sort(list(instance.columns)), np.sort(['param2', 'param3']))
 
     def test_smooth_data(self):
         factor = 2

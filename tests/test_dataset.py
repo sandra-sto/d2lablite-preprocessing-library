@@ -4,6 +4,7 @@ import numpy as np
 from mock import Mock
 from numpy.testing import assert_array_equal
 
+from preprocessing.transforms import instance_transforms
 from tests import instance_and_dataset_creator
 
 
@@ -18,17 +19,20 @@ class TestDataset(TestCase):
 
     def test_perform_transform_inplace_false(self):
         mock = Mock(return_value = lambda x: x)
-        dataset = self.dataset.perform_instance_transform(mock, False, {'param' : 'value'})
+        dataset = self.dataset.perform_instance_transform(mock, {'param' : 'value'}, False)
 
         mock.assert_called_with(param = 'value')
         self.assertIsNotNone(dataset)
+        self.assertNotEqual(dataset, self.dataset)
 
     def test_perform_transform_inplace_true(self):
         mock = Mock(return_value = lambda x: x)
-        dataset = self.dataset.perform_instance_transform(mock, True, {'param' : 'value'})
+        dataset = self.dataset.perform_instance_transform(mock, {'param' : 'value'}, True)
 
         mock.assert_called_with(param = 'value')
-        self.assertIsNone(dataset)
+        self.assertIsNotNone(dataset)
+        self.assertEqual(self.dataset, dataset)
+
 
     def test_perform_dataset_transform(self):
         mock = Mock(return_value = self.dataset)
@@ -36,4 +40,4 @@ class TestDataset(TestCase):
         dataset= self.dataset.perform_dataset_transform(mock, {'param' : 'value'})
 
         mock.assert_called_with(self.dataset, param = 'value')
-        self.assertIsNotNone(dataset)
+        self.assertEqual(dataset, mock.return_value)

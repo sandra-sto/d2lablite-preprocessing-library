@@ -50,6 +50,9 @@ class Instance:
     def copy_with_different_data(self, new_data):
         return Instance(self.id, new_data, self.type, self.start_date, self.meta_data)
 
+    def copy(self):
+        return Instance(self.id, self.data, self.type, self.start_date, self.meta_data)
+
     def index_to_timedelta_ms(self):
         self.data.index = self.data.index - self.data.index[0]
 

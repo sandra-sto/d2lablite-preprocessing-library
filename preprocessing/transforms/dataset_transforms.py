@@ -16,7 +16,7 @@ def pca(dataset: DataSet, num_components: int) :
 
     return DataSet(reduced), components
 
-def standardize(dataset: DataSet, inplace: bool)-> (DataSet, Series, Series):
+def standardize(dataset: DataSet, inplace: bool = False)-> (DataSet, Series, Series):
     ss = StandardScaler(copy = not inplace)
 
     data_by_columns = np.array([instance.data.values.flatten() for instance in dataset.instances])

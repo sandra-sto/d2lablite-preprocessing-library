@@ -3,25 +3,30 @@ from typing import List, Callable
 import numpy as np
 
 from preprocessing.model.instance import Instance
-
+from multiprocessing import Pool
 
 class DataSet:
     def __init__(self, instances : List[Instance]):
         self.instances = instances
 
-    def perform_instance_transform(self, transform: Callable, inplace: bool, arguments: dict) :
+    def perform_instance_transform(self, transform: Callable, arguments: dict, inplace: bool = True) :
         transform_method = transform(**arguments)
+        pool = Pool()
+        # transformed = pool.map(transform_method, self.instances)
 
         transformed = [transform_method(instance) for instance in self.instances]
         transformed = list(filter(None.__ne__, transformed))
         if inplace:
             self.instances = transformed
-            return None
+            return self
         else:
             return DataSet(transformed)
 
-    def perform_dataset_transform(self, transform: Callable, arguments: dict):
-        return transform(self, **arguments)
+    def perform_dataset_transform(self, transform: Callable, arguments: dict, inplace: bool = True):
+        transformed_dataset = transform(self, **arguments)
+        if inplace:
+            self.instances = transformed_dataset.instances
+        return transformed_dataset
 
     @property
     def feature_vector(self) -> np.array:

@@ -10,13 +10,13 @@ from preprocessing.util.preprocessing_exception import PreprocessingException
 
 methods = {'MEDIAN': np.median, 'MEAN': np.mean}
 
+
+# these method always return new instance
 def resample( resample_factor: str, resample_method: str, instance: Instance) -> Instance:
     try:
         resampled = instance.data.resample(resample_factor).apply(methods[resample_method.strip().upper()])
         resampled_filled = resampled.fillna(method = 'bfill')
-        # return resampled_filled
     except Exception as exc:
-        logging.exception('Error occured during resampling')
         raise PreprocessingException('Unappropriate argument for resampling', exc)
     else:
         return instance.copy_with_different_data(resampled_filled)
@@ -37,61 +37,17 @@ def make_windows(period, instance: Instance) -> Instance:
 
 def remove_constant_parameters(instance : Instance) -> Instance:
     data = instance.data
-    return data.loc[:, (data != data.iloc[0]).any()]
+    data_without_constants = data.loc[:, (data != data.iloc[0]).any()]
+
+    return instance.copy_with_different_data(data_without_constants)
 
 def filter_parameters(parameters_used : List[str], instance: Instance) -> Instance:
-    instance = instance.data[parameters_used]
-    return instance
+    filtered_data = instance.data[parameters_used]
+    return instance.copy_with_different_data(filtered_data)
 
 def filter_parameters_except(parameters_excluded: List[str], instance: Instance) -> Instance:
     parameters_used = list(set(instance.columns) - set(parameters_excluded))
     return filter_parameters(parameters_used, instance)
-
-def boost_parameters(parameters: List[str], factor : int, instance):
-    instance.data[parameters]*=factor
-    return instance
-
-def filter_instance_by_date(start_date : str, end_date: str, instance: Instance) -> Instance:
-
-    if isinstance(instance.data.index, DatetimeIndex):
-        instance.data = instance.data.loc[start_date : end_date]
-
-
-    elif isinstance(instance.data.index, TimedeltaIndex):
-        # todo fill for timedelta index
-        # start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S.%f')
-        # end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S.%f')
-        #
-        # diff_start = np.timedelta64(start_date - instance.start_date)
-        # diff_end = np.timedelta64(end_date- instance.start_date)
-        #
-        # instance.data = instance.data.loc[diff_start : diff_end]
-
-        instance.data.index = np.datetime64(instance.start_date)+instance.data.index
-
-        instance.data = instance.data.loc[start_date : end_date,]
-        instance.data.index = instance.data.index-instance.data.index[0]
-
-    else:
-        raise PreprocessingException('Inappropriate DataFrame format')
-
-    # change start time if needed
-    if instance.start_date != instance.get_instance_index(0):
-        instance.start_date = instance.get_instance_index(0)
-
-    return None if len(instance.data) == 0 else instance
-
-def __eliminate_picks_using_quantiles(instance : Instance) -> Instance:
-    low, high = 0.05, 0.95
-
-    quantiles = instance.data.quantile([low, high])
-
-    for name in instance.columns:
-        instance = instance[(instance[name] >= quantiles.loc[low, name]) &
-                            (instance[name] <= quantiles.loc[high, name])]
-
-    instance.fillna(method='ffill', inplace=True)
-    return instance
 
 def wavelet(frequency_range, instance: Instance) -> Instance:
     pass
@@ -102,7 +58,51 @@ def smooth_data(factor, method_name: str, instance: Instance) -> Instance:
     smoothed = smoothed.fillna(method='bfill')
     return smoothed
 
+def boost_parameters(parameters: List[str], factor: int, instance):
+    boosted = instance.copy()
+    boosted.data[parameters]*=factor
+    return boosted
+
+def filter_instance_by_date(start_date : str, end_date: str, instance: Instance) -> Instance:
+
+    filtered_instance = instance.copy()
+    if isinstance(instance.data.index, DatetimeIndex):
+        filtered_instance.data = filtered_instance.data.loc[start_date : end_date]
+
+
+    elif isinstance(instance.data.index, TimedeltaIndex):
+        # todo fill for timedelta index
+
+        filtered_instance.data.index = np.datetime64(filtered_instance.start_date)+filtered_instance.data.index
+
+        filtered_instance.data = filtered_instance.data.loc[start_date : end_date, ]
+        filtered_instance.data.index = filtered_instance.data.index-filtered_instance.data.index[0]
+
+    else:
+        raise PreprocessingException('Inappropriate DataFrame format')
+
+    # change start time if needed
+    if filtered_instance.start_date != filtered_instance.get_instance_index(0):
+        filtered_instance.start_date = filtered_instance.get_instance_index(0)
+
+    return None if len(filtered_instance.data) == 0 else filtered_instance
+
+def __eliminate_peaks_using_quantiles(instance : Instance) -> Instance:
+    low, high = 0.05, 0.95
+
+    quantiles = instance.data.quantile([low, high])
+
+    instance_with_eliminated_peaks = instance.copy()
+
+    for name in instance.columns:
+        instance_with_eliminated_peaks = instance[(instance[name] >= quantiles.loc[low, name]) &
+                            (instance[name] <= quantiles.loc[high, name])]
+
+    instance_with_eliminated_peaks.fillna(method='ffill', inplace=True)
+    return instance_with_eliminated_peaks
+
 def standardize_instance(instance: Instance, means: Series, stdevs: Series):
+    standardized = instance.copy()
     for param in means.index:
-        instance.data[param] = (instance.data[param]-means[param]) / stdevs[param]
-    return instance
+        standardized.data[param] = (instance.data[param]-means[param]) / stdevs[param]
+    return standardized
