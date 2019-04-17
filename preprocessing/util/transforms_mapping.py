@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Callable
 
-from preprocessing.transforms import instance_transforms
+from preprocessing.transforms import instance_transforms_impl
 from preprocessing.util.preprocessing_exception import PreprocessingException
 
 
@@ -17,20 +17,20 @@ class TransformsMapping:
 
 
     def init_mapping_for_tranforms(self):
-        self.timeseries_transforms = {instance_transforms.resample,
-                                      instance_transforms.remove_peaks,
-                                      instance_transforms.make_windows,
-                                      instance_transforms.remove_constant_parameters,
-                                      instance_transforms.filter_parameters,
-                                      instance_transforms.filter_instances_by_date,
-                                      instance_transforms.boost_parameters,
-                                      instance_transforms.wavelet,
-                                      instance_transforms.smooth_data}
+        self.timeseries_transforms = {instance_transforms_impl.resample,
+                                      instance_transforms_impl.remove_peaks,
+                                      instance_transforms_impl.make_windows,
+                                      instance_transforms_impl.remove_constant_parameters,
+                                      instance_transforms_impl.filter_parameters,
+                                      instance_transforms_impl.filter_instance_by_date,
+                                      instance_transforms_impl.boost_parameters,
+                                      instance_transforms_impl.wavelet,
+                                      instance_transforms_impl.smooth_data}
 
-        self.univariate_transforms = {instance_transforms.remove_constant_parameters,
-                                      instance_transforms.filter_parameters,
-                                      instance_transforms.filter_instances_by_date,
-                                      instance_transforms.boost_parameters}
+        self.univariate_transforms = {instance_transforms_impl.remove_constant_parameters,
+                                      instance_transforms_impl.filter_parameters,
+                                      instance_transforms_impl.filter_instance_by_date,
+                                      instance_transforms_impl.boost_parameters}
 
 
     def is_transform_applicable(self, data_type: DataType, transform: Callable):

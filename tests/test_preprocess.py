@@ -3,7 +3,7 @@ from unittest import TestCase
 from mock import Mock
 
 from preprocessing.preprocess import Preprocessor
-from preprocessing.transforms import instance_transforms, dataset_transforms
+from preprocessing.transforms import dataset_transforms, instance_transforms_impl
 from preprocessing.util.transforms_mapping import DataType
 
 
@@ -20,7 +20,7 @@ class TestInstanceDfTransformsStrategy(TestCase):
 
         self.preprocessor.preprocess(instance_transforms_passed, dataset_transforms_passed, self.dataset, type, inplace)
 
-        self.dataset.perform_instance_transform.assert_called_with(instance_transforms.filter_parameters, inplace, {'parameters_used':['param1']})
+        self.dataset.perform_instance_transform.assert_called_with(instance_transforms_impl.filter_parameters, inplace, {'parameters_used':['param1']})
         self.dataset.perform_dataset_transform.assert_called_with(dataset_transforms.pca, {'num_components':3})
 
 

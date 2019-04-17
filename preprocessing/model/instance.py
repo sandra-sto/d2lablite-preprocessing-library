@@ -5,7 +5,6 @@ class Instance:
 
     def __init__(self, id: str, data: object, type: str, start_date: datetime, metadata: dict):
         self._id = id
-
         self._data = data
         self._type = type
         self._start_date = start_date

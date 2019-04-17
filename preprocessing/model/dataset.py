@@ -1,20 +1,29 @@
+from functools import partial
+from multiprocessing import Pool
 from typing import List, Callable
 
 import numpy as np
 
 from preprocessing.model.instance import Instance
-from multiprocessing import Pool
+
+
+# take a look at torch and dask
 
 class DataSet:
     def __init__(self, instances : List[Instance]):
         self.instances = instances
 
-    def perform_instance_transform(self, transform: Callable, arguments: dict, inplace: bool = True) :
-        transform_method = transform(**arguments)
-        pool = Pool()
-        # transformed = pool.map(transform_method, self.instances)
+    def perform_instance_transform(self, transform_method: Callable, arguments: dict, inplace: bool = True) :
+        # in case instance_transforms closures are used
+        # transform_method = transform(**arguments)
 
-        transformed = [transform_method(instance) for instance in self.instances]
+        # sequential implementation
+        # transformed = [transform_method(instance, **arguments) for instance in self.instances]
+
+        # multiprocess implementation
+        pool = Pool()
+        transformed = pool.map(partial(transform_method, **arguments), self.instances)
+
         transformed = list(filter(None.__ne__, transformed))
         if inplace:
             self.instances = transformed

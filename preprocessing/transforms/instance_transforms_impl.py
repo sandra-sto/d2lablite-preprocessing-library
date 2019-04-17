@@ -1,18 +1,16 @@
-import logging
 from typing import List
 
-import datetime
 import numpy as np
 from pandas import DatetimeIndex, TimedeltaIndex, Series
-from unittest import skip
+
 from preprocessing.model.instance import Instance
 from preprocessing.util.preprocessing_exception import PreprocessingException
 
 methods = {'MEDIAN': np.median, 'MEAN': np.mean}
 
 
-# these method always return new instance
-def resample( resample_factor: str, resample_method: str, instance: Instance) -> Instance:
+# these methods always return new instance
+def resample(instance: Instance, resample_factor: str, resample_method: str) -> Instance:
     try:
         resampled = instance.data.resample(resample_factor).apply(methods[resample_method.strip().upper()])
         resampled_filled = resampled.fillna(method = 'bfill')
@@ -21,14 +19,14 @@ def resample( resample_factor: str, resample_method: str, instance: Instance) ->
     else:
         return instance.copy_with_different_data(resampled_filled)
 
-def remove_peaks(removing_peaks_method: str, instance: Instance) -> Instance:
+def remove_peaks(instance: Instance, removing_peaks_method: str) -> Instance:
 
     if removing_peaks_method.strip().upper() == 'QUANTILES':
-        return __eliminate_picks_using_quantiles(instance)
+        return __eliminate_peaks_using_quantiles(instance)
     else:
         raise PreprocessingException('Unappropriate argument for removing peaks')
 
-def make_windows(period, instance: Instance) -> Instance:
+def make_windows(instance: Instance, period) -> Instance:
     if isinstance(instance.data.index, DatetimeIndex):
         period_index_data = instance.data.to_period(period)
         return instance.copy_with_different_data(period_index_data)
@@ -41,40 +39,39 @@ def remove_constant_parameters(instance : Instance) -> Instance:
 
     return instance.copy_with_different_data(data_without_constants)
 
-def filter_parameters(parameters_used : List[str], instance: Instance) -> Instance:
+def filter_parameters(instance: Instance, parameters_used : List[str]) -> Instance:
+    # if
     filtered_data = instance.data[parameters_used]
     return instance.copy_with_different_data(filtered_data)
 
-def filter_parameters_except(parameters_excluded: List[str], instance: Instance) -> Instance:
+def filter_parameters_except(instance: Instance, parameters_excluded: List[str]) -> Instance:
     parameters_used = list(set(instance.columns) - set(parameters_excluded))
-    return filter_parameters(parameters_used, instance)
+    return filter_parameters(instance, parameters_used)
 
-def wavelet(frequency_range, instance: Instance) -> Instance:
+def wavelet(instance: Instance, frequency_range) -> Instance:
     pass
 
-def smooth_data(factor, method_name: str, instance: Instance) -> Instance:
+def smooth_data(instance: Instance, factor, method_name: str) -> Instance:
     windowed = instance.data.rolling(window = factor)
     smoothed = windowed.apply(methods[method_name.strip().upper()])
     smoothed = smoothed.fillna(method='bfill')
     return smoothed
 
-def boost_parameters(parameters: List[str], factor: int, instance):
+def boost_parameters(instance, parameters: List[str], factor: int):
     boosted = instance.copy()
     boosted.data[parameters]*=factor
     return boosted
 
-def filter_instance_by_date(start_date : str, end_date: str, instance: Instance) -> Instance:
+def filter_instance_by_date(instance: Instance, start_date : str, end_date: str) -> Instance:
 
     filtered_instance = instance.copy()
     if isinstance(instance.data.index, DatetimeIndex):
         filtered_instance.data = filtered_instance.data.loc[start_date : end_date]
 
-
     elif isinstance(instance.data.index, TimedeltaIndex):
         # todo fill for timedelta index
 
         filtered_instance.data.index = np.datetime64(filtered_instance.start_date)+filtered_instance.data.index
-
         filtered_instance.data = filtered_instance.data.loc[start_date : end_date, ]
         filtered_instance.data.index = filtered_instance.data.index-filtered_instance.data.index[0]
 

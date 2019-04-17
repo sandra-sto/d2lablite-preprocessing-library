@@ -1,9 +1,9 @@
 import logging
+from os.path import dirname
 
 from preprocessing.model.dataset import DataSet
-from preprocessing.transforms import instance_transforms, dataset_transforms
+from preprocessing.transforms import dataset_transforms, instance_transforms_impl
 from preprocessing.util.transforms_mapping import DataType, TransformsMapping
-from os.path import dirname
 
 FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s"
 DEFAULT_LOGGER_PATH = dirname(__file__) + '/preprocessing.log'
@@ -32,7 +32,7 @@ class Preprocessor:
 
         if order is None:
             for transform in instance_transforms_passed.keys():
-                method = getattr(instance_transforms, transform)
+                method = getattr(instance_transforms_impl, transform)
 
                 if self.transforms_mapping.is_transform_applicable(data_type, method):
                     transform_parameters = instance_transforms_passed[transform]
