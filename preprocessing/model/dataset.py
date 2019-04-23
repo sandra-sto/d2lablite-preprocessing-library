@@ -9,6 +9,14 @@ from preprocessing.model.instance import Instance
 
 # take a look at torch and dask
 
+def instance_transforms(num_of_cores):
+    def transform(transform_method, arguments, instances):
+        pool = Pool(num_of_cores)
+        transformed = pool.map(partial(transform_method, **arguments), instances)
+        return transformed
+    return transform
+
+
 class DataSet:
     def __init__(self, instances : List[Instance]):
         self.instances = instances
@@ -21,8 +29,12 @@ class DataSet:
         # transformed = [transform_method(instance, **arguments) for instance in self.instances]
 
         # multiprocess implementation
-        pool = Pool()
-        transformed = pool.map(partial(transform_method, **arguments), self.instances)
+        # if dataframes turn out to be very big, consider using Dask, it is used when dataframe cannot fit into ram
+
+        # None means all cores
+        num_of_cores = 6
+        transform_method_paralelized = instance_transforms(num_of_cores)
+        transformed = transform_method_paralelized(transform_method, arguments, self.instances)
 
         transformed = list(filter(None.__ne__, transformed))
         if inplace:

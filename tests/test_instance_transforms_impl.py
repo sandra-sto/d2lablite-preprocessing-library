@@ -15,8 +15,8 @@ class TestInstanceTransformsImpl(TestCase):
         self.instance_with_index = instance_and_dataset_creator.create_instance(num_of_columns= 3, num_of_values = 3, index = True)
 
     def test_boost(self):
-        instance = instance_transforms_impl.boost_parameters(self.instance, ['param2'], 5, )
-        values = np.array([[0, 5, 2]]*3)
+        instance = instance_transforms_impl.boost_parameters(self.instance, ['param2'], 5)
+        values = np.array([[0., 5., 2.]]*3)
         boosted_expected = pd.DataFrame(values, columns = instance.data.columns)
         pd.testing.assert_frame_equal(boosted_expected, instance.data)
 

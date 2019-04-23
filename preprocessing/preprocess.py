@@ -25,7 +25,6 @@ class Preprocessor:
 
     def __init__(self, log_file = ''):
         self.transforms_mapping = TransformsMapping()
-        logging.basicConfig(level=logging.INFO, filename=log_file)
         self.logger = define_logger(log_file)
 
     def preprocess(self, instance_transforms_passed : dict, dataset_transforms_passed: dict, dataset: DataSet, data_type: DataType, inplace= True, order = None):
