@@ -22,6 +22,6 @@ class TestTransformsMapping(TestCase):
         self.assertEqual(is_applicable, False)
 
     def test_is_transform_applicable_for_unexisting_tranform(self):
-        type = "univariate"
+        type = "one_valued"
 
         self.assertRaises(PreprocessingException, self.mapping.is_transform_applicable, type, instance_transforms.make_windows)
