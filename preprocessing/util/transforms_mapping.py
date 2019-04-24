@@ -7,13 +7,13 @@ from preprocessing.util.preprocessing_exception import PreprocessingException
 
 class DataType(Enum):
     timeseries = 0
-    univariate = 1
+    one_valued = 1
 
 
 class TransformsMapping:
     def __init__(self):
         self.init_mapping_for_tranforms()
-        self.mapping = {DataType.univariate: self.univariate_transforms, DataType.timeseries: self.timeseries_transforms}
+        self.mapping = {DataType.one_valued: self.one_valued_transforms, DataType.timeseries: self.timeseries_transforms}
 
 
     def init_mapping_for_tranforms(self):
@@ -27,7 +27,7 @@ class TransformsMapping:
                                       instance_transforms_impl.wavelet,
                                       instance_transforms_impl.smooth_data}
 
-        self.univariate_transforms = {instance_transforms_impl.remove_constant_parameters,
+        self.one_valued_transforms = {instance_transforms_impl.remove_constant_parameters,
                                       instance_transforms_impl.filter_parameters,
                                       instance_transforms_impl.filter_instance_by_date,
                                       instance_transforms_impl.boost_parameters}

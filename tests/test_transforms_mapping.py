@@ -16,7 +16,7 @@ class TestTransformsMapping(TestCase):
           self.assertEqual(is_applicable, True)
 
     def test_is_transform_applicable_when_false(self):
-        type = DataType.univariate
+        type = DataType.one_valued
 
         is_applicable = self.mapping.is_transform_applicable(type, instance_transforms_impl.make_windows)
         self.assertEqual(is_applicable, False)
